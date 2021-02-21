@@ -1,11 +1,10 @@
-import open3d as o3d
 from copy import deepcopy
 
 from o3d_impl import *
 
 
-# 全局 粗配准
-# 基于RANSAC得到初始位姿  这里面集成了匹配
+###################全局 粗配准 #############
+# 基于RANSAC得到初始位姿  这里面集成了匹配  直接使用特征了
 def execute_global_registration(source_down, target_down,
                                 source_fpfh, target_fpfh, voxel_size):
     distance_threshold = voxel_size * 1.5
@@ -47,13 +46,15 @@ def refine_registration(source, target, result_ransac, voxel_size):
     # print("   clouds to refine the alignment. This time we use a strict")
     # print("   distance threshold %.3f." % distance_threshold)
     result = o3d.pipelines.registration.registration_icp(
-        source, target, distance_threshold, result_ransac.transformation,
+        # source, target, distance_threshold, result_ransac.transformation,
+        source, target, distance_threshold, result_ransac,
         o3d.pipelines.registration.TransformationEstimationPointToPlane())
     return result
 
 
-# 可视化
-def draw_registration_result(source, target, transformation, is_rgb=0):
+################## 可视化 ####################
+
+def draw_registration_result(source, target, transformation, is_rgb=0, w_title='3D View'):
     source_temp = deepcopy(source)
     target_temp = deepcopy(target)
 
@@ -67,14 +68,21 @@ def draw_registration_result(source, target, transformation, is_rgb=0):
     # target_temp.flip()
 
     o3d.visualization.draw_geometries([source_temp, target_temp],
-                                      # zoom=0.4559,
-                                      # front=[0.6452, -0.3036, -0.7011],
-                                      # lookat=[1.9892, 2.0208, 1.8945],
-                                      # up=[-0.2779, -0.9482, 0.1556]
+                                      window_name=w_title,
+                                      # zoom=1,
+                                      # front=[0, 0, 0.001],  # 相机位置
+                                      # lookat=[0, 0, 0],  # 对准的点
+                                      # up=[0, -1, 0],  # 用于确定相机右x轴
+
+                                      zoom=1,
+                                      front=[0, -1, 0.1],  # 相机位置
+                                      lookat=[0, 0, 0],  # 对准的点
+                                      up=[0, 1, 0.1],  # 用于确定相机右x轴
+                                      # point_show_normal=True
                                       )
 
 
-# 分割效果
+# 场景分割效果
 def draw_segmentation_result(target, is_rgb=0):
     target_temp = deepcopy(target)
 
@@ -85,16 +93,15 @@ def draw_segmentation_result(target, is_rgb=0):
     # target_temp.flip()
 
     o3d.visualization.draw_geometries([target_temp],
-                                      # zoom=0.4559,
-                                      # front=[0.6452, -0.3036, -0.7011],
-                                      # lookat=[1.9892, 2.0208, 1.8945],
-                                      # up=[-0.2779, -0.9482, 0.1556]
+                                      zoom=1,
+                                      front=[0, -1, 0.1],  # 相机位置
+                                      lookat=[0, 0, 0],  # 对准的点
+                                      up=[0, 1, 0.1],  # 用于确定相机右x轴
                                       )
 
 
 # 在下采样的上面划线
 def draw_line_down(source_down, target_down, line_set, axis_mesh=None):
-
     if axis_mesh is None:
         o3d.visualization.draw_geometries([
             source_down,  # 重合的原因：source是直接抠出来的
@@ -102,6 +109,11 @@ def draw_line_down(source_down, target_down, line_set, axis_mesh=None):
             line_set
         ],
             window_name='ANTenna3D',
+            zoom=1,
+            front=[0, -1, 0.1],  # 相机位置
+            lookat=[0, 0, 0],  # 对准的点
+            up=[0, 1, 0.1],  # 用于确定相机右x轴
+            # point_show_normal=True
         )
 
     o3d.visualization.draw_geometries([
@@ -111,7 +123,13 @@ def draw_line_down(source_down, target_down, line_set, axis_mesh=None):
         axis_mesh
     ],
         window_name='ANTenna3D',
+        zoom=1,
+        front=[0, -1, 0.1],  # 相机位置
+        lookat=[0, 0, 0],  # 对准的点
+        up=[0, 1, 0.1],  # 用于确定相机右x轴
+        # point_show_normal=True
     )
+
 
 # 生成连接线
 # 输入模型和场景，以及匹配的索引  即可得到连接线
@@ -146,11 +164,11 @@ def preprocess_point_cloud(pcd, voxel_size):
 
     radius_feature = voxel_size * 5
     # print(":: Compute FPFH feature with search radius %.3f." % radius_feature)
-    pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+    pcd_down_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
         pcd_down,
         o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
 
-    return pcd_down, pcd_fpfh
+    return pcd_down, pcd_down_fpfh
 
 
 # 要不要再拆开，后面再看需求
@@ -169,14 +187,8 @@ def get_fpfh(pcd_in, voxel_size):
 
 
 def prepare_dataset(model_path, voxel_size):
-    print(":: Load two point clouds and disturb initial pose.")
+    # print(":: Load two point clouds and disturb initial pose.")
     source = o3d.io.read_point_cloud(model_path)
-
-    # trans_init = np.asarray([[1.0, 0.0, 0.0, 5.0],
-    #                          [0.0, 1.0, 0.0, -18.0],
-    #                          [0.0, 0.0, 1.0, 0.0],
-    #                          [0.0, 0.0, 0.0, 1.0]])
-    # source.transform(trans_init)
 
     source.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
 
@@ -187,7 +199,7 @@ def prepare_dataset(model_path, voxel_size):
 
 # 单纯加载模型并下采样
 def load_model(model_path, trans_init, voxel_size):
-    print(":: Load one point cloud.")
+    # print(":: Load one point cloud.")
     source = o3d.io.read_point_cloud(model_path)
     source.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
 
@@ -203,3 +215,14 @@ def load_model(model_path, trans_init, voxel_size):
     source_down.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
 
     return source, source_down
+
+
+# 读取单个点云
+# 下采样，计算FPFH
+def read_pcd(model_path, voxel_size):
+    pcd = o3d.io.read_point_cloud(model_path)
+    pcd.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+
+    pcd_down, pcd_down_fpfh = preprocess_point_cloud(pcd, voxel_size)
+
+    return pcd, pcd_down, pcd_down_fpfh

@@ -1,4 +1,4 @@
-from path_service import *
+from path_lib import *
 import configparser
 
 
