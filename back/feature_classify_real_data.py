@@ -1,4 +1,4 @@
-from fpfh_pose_2 import *
+from fpfh_pose_2_syn_n import *
 from path_lib import *
 from o3d_impl import *
 
@@ -100,14 +100,14 @@ if train:
     print('fit ok in {0:.2f} second'.format(delta_t))
 
     # 保存模型
-    dump(clf, '../model_lib/adaboost.clf')
+    dump(clf, '../feature_classify/model_lib/adaboost.clf')
 
 # 测试
 # 加载模型，提取特征  单模型分类 OK 能够分出
 # 如何应对杂乱场景多模型呢？
 
 # 加载模型
-clf = load('../model_lib/adaboost.clf')
+clf = load('../feature_classify/model_lib/adaboost.clf')
 
 # res = clf.predict([fpfh_data[0]])
 # print('res:', res)

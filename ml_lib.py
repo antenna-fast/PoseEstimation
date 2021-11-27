@@ -10,10 +10,10 @@ import numpy as np
 # 返回：点云簇的索引吧  这样避免大量传参（可能会占用很多内存？）
 def dbscan_segment(scene_down_np, search_radius=0.005, min_sample=5, threshold_n=50, class_num=5):
 
-    # search_radius=0.005  # 聚类搜索半径
-    # min_sample = 5  # 半径内的点
-    # threshold_n = 50  # 每个点集最少的点数  （因为就算满足一簇 也未必是想要的）
-    # class_num = 5
+    # search_radius  # 聚类搜索半径
+    # min_sample  # 半径内的点
+    # threshold_n  # 每个点集最少的点数  （因为就算满足一簇 也未必是想要的）
+    # class_num  # 5
 
     # Compute DBSCAN
     db = DBSCAN(eps=search_radius, min_samples=min_sample).fit(scene_down_np)
@@ -67,3 +67,21 @@ def get_class_res(res_in):
 
     score = class_max / res_num  # 置信度，预测最可能的结果的可能性
     return class_res, score
+
+
+# 根据所有的结果 找多类别
+# 输入: 分类结果
+# 输出: 类别
+def get_class_res_static(res_in, class_num):
+    res_num = len(res_in)  # 所有的预测结果
+    bin_count = np.bincount(res_in.astype(int))  # 按照索引 第几个元素有几个
+
+    score_list = bin_count / res_num
+
+    # for class_idx in range(class_num):
+    #     class_res = np.where(bin_count == class_idx)[0][0]  # 所在索引
+    #     score = class_res / res_num  # 置信度，预测最可能的结果的可能性
+    #
+    #     score_list.append(score)
+
+    return score_list
