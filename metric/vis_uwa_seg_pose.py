@@ -3,8 +3,9 @@ Author: ANTenna on 2021/12/25 5:50 下午
 aliuyaohua@gmail.com
 
 Description:
-
+pose estimation result
 """
+
 import copy
 import os
 import sys
@@ -17,7 +18,6 @@ from utils.path_lib import get_file_list
 
 
 if __name__ == '__main__':
-
     is_rgb = 0
     models_color = [0.9, 0.4, 0.1]
     scene_color = [0.1, 0.5, 0.8]

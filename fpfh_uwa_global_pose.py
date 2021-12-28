@@ -56,11 +56,8 @@ if __name__ == '__main__':
     # parameters
     # voxel_size = 0.8
     voxel_size = 1.8
-    # voxel_size = 1.9
     # voxel_size = 2.5
     # voxel_size = 2.8
-    # voxel_size = 3
-    # voxel_size = 3.4
 
     # ransac_iter_num = 600
     # ransac_iter_num = 1800
@@ -117,6 +114,7 @@ if __name__ == '__main__':
     # logger = create_logger(logger_path, log_level='INFO')
     logger = create_logger(logger_path, log_level=log_level)
     logger.info('root_path: '.format(root_path))
+
     logger.info('PARAMETER ')
     logger.info('match ratio: {}'.format(match_ratio))
 
@@ -177,7 +175,6 @@ if __name__ == '__main__':
         # while len(scene_down_np) > set_scene_points_threshold:  # to guarantee recall
         if 1:
             # iter all possible models
-            # for model_name_rt in range(num_models):
             for i, model_name_rt in enumerate(model_info):  # get key
                 logger.info('matching model {}: [{}/{}] ... '.format(model_name_rt, i + 1, num_models))
                 model_rt = model_info[model_name_rt].get('model')
@@ -225,11 +222,9 @@ if __name__ == '__main__':
                 if is_vis:  # vis coarse registration result
                     draw_registration_result(model_down_rt, scene_down, res_ransac, scene_name + '_RansacGlobal')
                     # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
-                    # inlier and outlier line-set 根据RANSAC得到 全局匹配时的 内外点
                     inlier_line_set = get_line_set(model_paired, scene_paired, inlier_buff, inlier_buff, inlier_lineset_color)
                     outlier_line_set = get_line_set(model_paired, scene_paired, outlier_buff, outlier_buff, outlier_lineset_color)
                     draw_line_down(model_down_rt, scene_down, inlier_line_set, outlier_line_set, win_name=scene_name + '_LineSet')
-                    # draw_line_down(model_rt, scene, inlier_line_set, outlier_line_set, win_name=scene_name + '_LineSet')
 
                 # ICP
                 res_icp = refine_registration(model_down_rt, scene_down, res_ransac, voxel_size)
@@ -238,13 +233,10 @@ if __name__ == '__main__':
                     draw_registration_result(model_down_rt, scene_down, res_icp, scene_name + '_RansacGlobal+ICP')  # RANSAC + ICP
 
                 # delete point from scene
-
-                # result evaluation according to gt
                 if model_name_rt == 'rhino':
                     continue
 
                 # the scene may not exist current model
-                # print(model_name_to_gt[model_name_rt])
                 try:
                     model_name_in_gt = model_name_to_gt[model_name_rt]
                     gt_rt = gts[model_name_in_gt]
@@ -283,6 +275,3 @@ if __name__ == '__main__':
         mean_inlier_ratio[m] = mean_inlier_ratio_tmp
         write_line = 'model: {}  overall inlier ratio: {}'.format(m, mean_inlier_ratio_tmp)
         print(write_line)
-        # f.write(write_line)
-
-    # multi-models pose estimation result visualization
