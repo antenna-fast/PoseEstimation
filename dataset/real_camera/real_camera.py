@@ -52,10 +52,9 @@ def get_cloud_xyz(depth, scale, u0, v0, fx, fy):
     return cloud
 
 
-# 添加颜色  问题：有一点对齐误差
+# XYZ+RGB  问题：有一点对齐误差
 def get_cloud_xyzrgb(depth, color, scale, u0, v0, fx, fy):
     global xmap, ymap
-
     # zmap = depth.flatten()
     zmap = depth.reshape(-1)
     # Z = zmap * scale  # 乘 就变成了m为单位
@@ -70,11 +69,10 @@ def get_cloud_xyzrgb(depth, color, scale, u0, v0, fx, fy):
 
     # colors
     rgbs = color.reshape(-1, 3)
-
     return cloud, rgbs / 255
 
 
-# 将单个xyZ转为XYZ  图像坐标-》相机坐标
+# 将单个xyZ转为XYZ  图像坐标->相机坐标
 def get_xyz(pix, Z, u0, v0, fx, fy):  # (x,y)
     Y = (pix[0] - v0) / fy * Z
     X = (pix[1] - u0) / fx * Z
@@ -90,10 +88,8 @@ def flann_init():
                         table_number=6,  # 12
                         key_size=12,  # 20
                         multi_probe_level=1)  # 2
-    search_params = dict(checks=50)  # or pass empty dictionary  这是第二个字典，指定了索引里的树应该被递归遍历的次数
-
+    search_params = dict(checks=50)  # or pass empty dictionary  这是第二个字典，指定了索引里的树应该被递归遍历的次数\
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-
     return flann
 
 

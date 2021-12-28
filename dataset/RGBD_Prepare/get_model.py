@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 
+
 # 加载RGBD的数据集 并进行可视化
 
 root_path = 'D:/SIA/Dataset/RGBD/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/'
@@ -21,10 +22,6 @@ idx = np.where(label == 4)[0]
 np.asarray(pcd.colors)[idx, :] = [0, 0, 1]
 
 pcd_cap = pcd.select_by_index(idx)
-
-
-def get_seg_idx():
-    return 0
 
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=1, origin=[0, 0, 0])

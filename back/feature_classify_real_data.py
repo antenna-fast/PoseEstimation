@@ -100,14 +100,14 @@ if train:
     print('fit ok in {0:.2f} second'.format(delta_t))
 
     # 保存模型
-    dump(clf, '../feature_classify/model_lib/adaboost.clf')
+    dump(clf, '../point_cloud_classifier/model_lib/adaboost.clf')
 
 # 测试
 # 加载模型，提取特征  单模型分类 OK 能够分出
 # 如何应对杂乱场景多模型呢？
 
 # 加载模型
-clf = load('../feature_classify/model_lib/adaboost.clf')
+clf = load('../point_cloud_classifier/model_lib/adaboost.clf')
 
 # res = clf.predict([fpfh_data[0]])
 # print('res:', res)
