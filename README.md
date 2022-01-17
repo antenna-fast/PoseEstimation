@@ -1,4 +1,4 @@
-This repository is the implement of Robust pose estimation method
+This is the implement of Robust pose estimation method
 
 
 Author: Yaohua Liu
