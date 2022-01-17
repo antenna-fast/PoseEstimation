@@ -1,10 +1,7 @@
-this is the implement of Robust pose estimation method
-
+This repository is the implement of Robust pose estimation method
 
 
 Author: Yaohua Liu
-Publication: 
-
 
 Pipeline:
 * Point Cloud instance segmentation
